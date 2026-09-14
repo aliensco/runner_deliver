@@ -1,20 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { User } from "../lib/types";
-
-interface ErrorBody { error?: { message?: string } }
-
-async function authRequest<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...init?.headers }
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as ErrorBody;
-    throw new Error(body.error?.message || `Request failed (${response.status})`);
-  }
-  return response.status === 204 ? undefined as T : response.json() as Promise<T>;
-}
+import { api } from "../lib/api";
 
 interface AuthValue {
   user: User | null;
@@ -32,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const response = await authRequest<{ user: User }>("/api/auth/me");
+      const response = await api.auth.me();
       setUser(response.user);
     } catch {
       setUser(null);
@@ -44,17 +30,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void refresh(); }, [refresh]);
 
   const login = useCallback(async (username: string, password: string) => {
-    const response = await authRequest<{ user: User }>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ username, password })
-    });
+    const response = await api.auth.login(username, password);
     setUser(response.user);
     return response.user;
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      await authRequest<void>("/api/auth/logout", { method: "POST" });
+      await api.auth.logout();
     } finally {
       setUser(null);
     }
