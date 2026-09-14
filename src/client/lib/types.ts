@@ -43,6 +43,7 @@ export interface Pagination {
 }
 
 export interface Order {
+  parcelDemo?: { campusName: string; parcelCount: number; pickupCode: string };
   id: number;
   orderNo: string;
   merchantId: number;

@@ -62,6 +62,7 @@ export function OrderDetailPage({ user }: { user: User }) {
           </Panel>
         </div>
         <aside className="order-detail-side">
+          {order.parcelDemo ? <Panel title="快递代取 · 演示订单" subtitle="不收费，不产生真实骑手收入"><dl className="detail-list"><div><dt>校区</dt><dd>{order.parcelDemo.campusName}</dd></div><div><dt>包裹数量</dt><dd>{order.parcelDemo.parcelCount} 件</dd></div><div><dt>取件码</dt><dd>{order.parcelDemo.pickupCode || "订单已结束，不再展示"}</dd></div></dl></Panel> : null}
           <Panel title="订单信息">
             <dl className="detail-list"><div><dt>订单状态</dt><dd><StatusBadge status={order.status} /></dd></div><div><dt>配送距离</dt><dd>{distance(order.distanceMeters)}</dd></div><div><dt>配送费用</dt><dd>{money(order.merchantChargeCents)}</dd></div><div><dt>骑手收入</dt><dd>{money(order.riderPayoutCents)}</dd></div><div><dt>计价规则</dt><dd>{order.pricingRuleName}</dd></div></dl>
           </Panel>

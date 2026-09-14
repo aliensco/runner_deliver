@@ -146,6 +146,25 @@ CREATE TABLE IF NOT EXISTS system_settings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+CREATE TABLE IF NOT EXISTS parcel_demo_resources (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  merchant_id INTEGER NOT NULL REFERENCES merchants(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  pricing_rule_id INTEGER NOT NULL REFERENCES pricing_rules(id)
+);
+CREATE TABLE IF NOT EXISTS parcel_demo_orders (
+  order_id INTEGER PRIMARY KEY REFERENCES orders(id),
+  source_user_id TEXT NOT NULL,
+  request_id TEXT NOT NULL,
+  request_hash TEXT NOT NULL,
+  campus_id INTEGER NOT NULL,
+  campus_name TEXT NOT NULL,
+  pickup_code TEXT NOT NULL,
+  parcel_count INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE (source_user_id, request_id)
+);
+CREATE INDEX IF NOT EXISTS idx_parcel_demo_owner ON parcel_demo_orders(source_user_id, order_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS idx_orders_merchant_id ON orders(merchant_id);
 CREATE INDEX IF NOT EXISTS idx_orders_rider_id ON orders(rider_id);

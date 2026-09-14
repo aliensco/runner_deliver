@@ -5,11 +5,13 @@ export interface AppConfig {
   port: number;
   databasePath: string;
   sessionCookieName: string;
+  sessionCookiePath: string;
   sessionCookieSecure: boolean;
   sessionTtlHours: number;
   bcryptRounds: number;
   seedDemoData: boolean;
   demoPassword: string;
+  parcelDemoKey: string;
 }
 
 export const defaultDemoPassword = "DemoOnly123!";
@@ -54,15 +56,18 @@ export function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     databasePath:
       configuredPath === ":memory:" ? configuredPath : path.resolve(configuredPath),
     sessionCookieName: "runner_session",
+    sessionCookiePath: process.env.SESSION_COOKIE_PATH || "/",
     sessionCookieSecure: booleanFromEnv(process.env.SESSION_COOKIE_SECURE, false),
     sessionTtlHours: numberFromEnv("SESSION_TTL_HOURS", process.env.SESSION_TTL_HOURS, 168),
     bcryptRounds: numberFromEnv("BCRYPT_ROUNDS", process.env.BCRYPT_ROUNDS, 10),
     seedDemoData: booleanFromEnv(process.env.SEED_DEMO_DATA, true),
     demoPassword: process.env.DEMO_PASSWORD ?? defaultDemoPassword,
+    parcelDemoKey: process.env.PARCEL_DEMO_KEY ?? "",
     ...overrides
   };
 
   if (!config.host.trim()) throw new Error("HOST must not be empty");
+  if (config.parcelDemoKey && config.parcelDemoKey.length < 32) throw new Error("PARCEL_DEMO_KEY must contain at least 32 characters");
   assertIntegerInRange("PORT", config.port, 0, 65_535);
   assertIntegerInRange("SESSION_TTL_HOURS", config.sessionTtlHours, 1, 24 * 365 * 10);
   assertIntegerInRange("BCRYPT_ROUNDS", config.bcryptRounds, 4, 31);

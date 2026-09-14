@@ -22,7 +22,7 @@ export function sessionCookieOptions(config: AppConfig): CookieOptions {
     httpOnly: true,
     sameSite: "lax",
     secure: config.sessionCookieSecure,
-    path: "/",
+    path: config.sessionCookiePath,
     maxAge: config.sessionTtlHours * 60 * 60 * 1000
   };
 }

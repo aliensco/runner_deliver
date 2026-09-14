@@ -7,6 +7,7 @@ import { apiMessage } from "../lib/format";
 import type { Role } from "../lib/types";
 
 const DEMO_PASSWORD = "DemoOnly123!";
+const showLocalAccounts = import.meta.env.VITE_SHOW_DEMO_ACCOUNTS !== "false";
 const demos: Array<{ role: Role; title: string; username: string; icon: typeof Shop; note: string }> = [
   { role: "admin", title: "管理员", username: "demo_admin", icon: ShieldCheck, note: "调度与全局运营" },
   { role: "merchant", title: "商户", username: "demo_merchant", icon: Shop, note: "发单与账户查看" },
@@ -16,8 +17,8 @@ const demos: Array<{ role: Role; title: string; username: string; icon: typeof S
 export function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("demo_admin");
-  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [username, setUsername] = useState(showLocalAccounts ? "demo_admin" : "");
+  const [password, setPassword] = useState(showLocalAccounts ? DEMO_PASSWORD : "");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -70,10 +71,10 @@ export function LoginPage() {
           <header>
             <span className="eyebrow">欢迎回来</span>
             <h2>登录工作台</h2>
-            <p>选择演示角色，或输入本地账号继续。</p>
+            <p>{showLocalAccounts ? "选择演示角色，或输入本地账号继续。" : "输入演示账号，查看订单与配送任务。"}</p>
           </header>
 
-          <div className="demo-accounts">
+          {showLocalAccounts ? <div className="demo-accounts">
             {demos.map((demo) => {
               const Icon = demo.icon;
               const active = username === demo.username;
@@ -90,7 +91,7 @@ export function LoginPage() {
                 </button>
               );
             })}
-          </div>
+          </div> : null}
 
           <div className="login-divider"><span>账号登录</span></div>
           <form onSubmit={handleSubmit} className="login-form">
@@ -105,7 +106,7 @@ export function LoginPage() {
             {error ? <div className="form-error" role="alert">{error}</div> : null}
             <Button size="lg" type="submit" loading={loading}>进入工作台 <ArrowRight size={18} /></Button>
           </form>
-          <p className="login-hint">以上均为本地 seed 演示账号，不使用任何线上系统凭据。</p>
+          <p className="login-hint">{showLocalAccounts ? "以上均为本地演示账号。" : "快递代取演示环境 · 不收取费用，不产生真实配送收入。"}</p>
         </div>
       </section>
     </div>

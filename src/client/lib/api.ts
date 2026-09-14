@@ -1,6 +1,6 @@
 import type * as Types from "./types";
 
-const API_ROOT = "/api";
+const API_ROOT = `${import.meta.env.BASE_URL}api`;
 
 export interface ApiRequestOptions {
   signal?: AbortSignal;

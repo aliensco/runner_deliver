@@ -16,6 +16,7 @@ import { ordersRouter } from "./routes/orders";
 import { pricingRulesRouter } from "./routes/pricingRules";
 import { ridersRouter } from "./routes/riders";
 import { settingsRouter } from "./routes/settings";
+import { parcelDemoRouter } from "./routes/parcelDemo";
 
 export interface Application {
   app: Express;
@@ -37,6 +38,7 @@ export function createApplication(overrides: Partial<AppConfig> = {}): Applicati
     res.json({ status: "ok" });
   });
   app.use("/api/auth", authRouter(db, config));
+  app.use("/api/integrations/parcel-demo", parcelDemoRouter(db, config));
 
   app.use("/api", requireAuth(db, config));
   app.use("/api/dashboard", dashboardRouter(db));

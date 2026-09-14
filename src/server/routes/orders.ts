@@ -97,7 +97,11 @@ export function ordersRouter(db: SqliteDatabase): Router {
   router.get("/:id", (req, res) => {
     const order = getOrder(db, idSchema.parse(req.params.id));
     assertCanViewOrder(order, actorFromRequest(req));
-    res.json({ order: orderDto(order) });
+    const parcel = db.prepare("SELECT campus_name, parcel_count, pickup_code FROM parcel_demo_orders WHERE order_id = ?").get(order.id) as { campus_name: string; parcel_count: number; pickup_code: string } | undefined;
+    res.json({ order: { ...orderDto(order), ...(parcel ? { parcelDemo: {
+      campusName: parcel.campus_name, parcelCount: parcel.parcel_count,
+      pickupCode: !["delivered", "cancelled"].includes(order.status) ? parcel.pickup_code : ""
+    } } : {}) } });
   });
 
   router.get("/:id/events", (req, res) => {
