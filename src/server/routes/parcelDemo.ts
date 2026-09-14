@@ -8,17 +8,18 @@ import { AppError } from "../errors";
 import { createOrder, getOrder, getOrderEvents, transitionOrder, type Actor } from "../orders";
 
 const sourceUser = z.string().regex(/^[1-9]\d{0,15}$/);
+const demoText = (max: number, fallback: string) => z.string().trim().max(max).default("").transform((value) => value || fallback);
 const inputSchema = z.object({
   sourceUserId: sourceUser,
   requestId: z.string().regex(/^[a-zA-Z0-9_-]{16,100}$/),
-  campusId: z.number().int().positive(),
-  campusName: z.string().trim().min(1).max(150),
-  pickupAddress: z.string().trim().min(2).max(300),
-  pickupCode: z.string().trim().min(1).max(100),
-  parcelCount: z.number().int().min(1).max(5),
-  deliveryAddress: z.string().trim().min(2).max(300),
-  recipientName: z.string().trim().min(1).max(50),
-  recipientPhone: z.string().regex(/^1[3-9]\d{9}$/),
+  campusId: z.number().int().nonnegative().default(0),
+  campusName: demoText(150, "演示校区（未选择）"),
+  pickupAddress: demoText(300, "演示取件地址（未填写）"),
+  pickupCode: demoText(100, "DEMO-未填写"),
+  parcelCount: z.number().int().min(1).max(9999).default(1),
+  deliveryAddress: demoText(300, "演示收件地址（未填写）"),
+  recipientName: demoText(50, "演示收件人"),
+  recipientPhone: demoText(50, "未填写（演示）"),
   remark: z.string().trim().max(300).default("")
 }).strict();
 

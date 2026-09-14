@@ -17,10 +17,13 @@ describe("Parcel mini-program integration", () => {
   it("requires service authorization and rejects client-controlled fields", async () => {
     expect((await request(application.app).post("/api/integrations/parcel-demo/orders").send(body)).status).toBe(401);
     expect((await create({ feeCents: 1 })).status).toBe(400);
-    expect((await create({ recipientPhone: "invalid" })).status).toBe(400);
+    expect((await create({ recipientPhone: "x".repeat(51) })).status).toBe(400);
   });
   it("closes the create, admin dispatch, rider fulfillment and customer tracking loop for free", async () => {
-    const created = await create(); expect(created.status).toBe(201);
+    const created = await create({ pickupAddress: "1", deliveryAddress: "1", recipientName: "1", recipientPhone: "1" }); expect(created.status).toBe(201);
+    expect(created.body.order.pickupAddress).toBe("1");
+    expect(created.body.order.deliveryAddress).toBe("1");
+    expect(created.body.order.recipientPhone).toBe("1");
     const id = created.body.order.id;
     const admin = await login("admin"); const rider = await login("rider");
     const riderId = (application.db.prepare("SELECT rider_id FROM users WHERE username = 'demo_rider'").get() as { rider_id: number }).rider_id;
@@ -38,6 +41,14 @@ describe("Parcel mini-program integration", () => {
     expect(final.body.order.events.length).toBe(5);
     expect(final.body.order.pickupCode).toBe("");
     expect((application.db.prepare("SELECT COUNT(*) AS n FROM ledger_entries WHERE order_id = ?").get(id) as { n: number }).n).toBe(0);
+  });
+  it("accepts an empty demo form and supplies clearly labelled defaults", async () => {
+    const created = await auth(request(application.app).post("/api/integrations/parcel-demo/orders"))
+      .send({ sourceUserId: "42", requestId: "parcel_empty_request_001" });
+    expect(created.status).toBe(201);
+    expect(created.body.order).toMatchObject({ campusId: 0, campusName: "演示校区（未选择）",
+      pickupAddress: "演示取件地址（未填写）", deliveryAddress: "演示收件地址（未填写）",
+      recipientName: "演示收件人", recipientPhone: "未填写（演示）", parcelCount: 1, feeCents: 0 });
   });
   it("deduplicates retry after a lost response and refuses conflicting retry data", async () => {
     const first = await create(); const second = await create();
